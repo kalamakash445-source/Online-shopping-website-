@@ -1,0 +1,72 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User's email address" },
+        "displayName": { "type": "string", "description": "User's display name" },
+        "photoURL": { "type": "string", "description": "User's profile picture URL" },
+        "role": { "type": "string", "enum": ["user", "admin"], "description": "User's role" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation time" }
+      },
+      "required": ["uid", "email", "role"]
+    },
+    "Product": {
+      "title": "Product",
+      "description": "E-commerce product information",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Product name" },
+        "description": { "type": "string", "description": "Product description" },
+        "price": { "type": "number", "description": "Product price in ₹" },
+        "category": { "type": "string", "description": "Product category" },
+        "image": { "type": "string", "description": "Product image URL" },
+        "rating": { "type": "number", "description": "Average rating" },
+        "stock": { "type": "integer", "description": "Available stock" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Product creation time" }
+      },
+      "required": ["name", "price", "category", "image"]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Customer order information",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "UID of the user who placed the order" },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "productId": { "type": "string" },
+              "name": { "type": "string" },
+              "price": { "type": "number" },
+              "quantity": { "type": "integer" }
+            }
+          }
+        },
+        "totalAmount": { "type": "number", "description": "Total order amount in ₹" },
+        "status": { "type": "string", "enum": ["pending", "shipped", "delivered"], "description": "Order status" },
+        "shippingAddress": {
+          "type": "object",
+          "properties": {
+            "name": { "type": "string" },
+            "address": { "type": "string" },
+            "phone": { "type": "string" }
+          }
+        },
+        "paymentMethod": { "type": "string", "enum": ["cod", "online"] },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Order placement time" }
+      },
+      "required": ["userId", "items", "totalAmount", "status", "shippingAddress"]
+    }
+  },
+  "firestore": {
+    "/users/{uid}": { "schema": "User", "description": "User profiles" },
+    "/products/{productId}": { "schema": "Product", "description": "Product catalog" },
+    "/orders/{orderId}": { "schema": "Order", "description": "Customer orders" }
+  }
+}

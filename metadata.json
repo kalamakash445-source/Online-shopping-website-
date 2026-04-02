@@ -1,0 +1,9 @@
+{
+  "name": "Bazaar - Modern E-commerce",
+  "description": "A professional full-stack e-commerce platform with user shopping features and a comprehensive admin dashboard, powered by React, Express, and Firebase.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
