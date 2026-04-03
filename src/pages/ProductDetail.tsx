@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 import { Product, CartItem } from '../types';
-import { Star, ShoppingCart, ArrowLeft, ShieldCheck, Truck, RotateCcw, Check } from 'lucide-react';
+import { api } from '../api';
+import { Star, ShoppingCart, ArrowLeft, ShieldCheck, Truck, Check } from 'lucide-react';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -16,11 +15,8 @@ export default function ProductDetail() {
     const fetchProduct = async () => {
       if (!id) return;
       try {
-        const docRef = doc(db, 'products', id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
-        }
+        const data = await api.getProduct(id);
+        setProduct(data);
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {

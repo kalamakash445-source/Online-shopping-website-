@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
-import { db } from '../firebase';
+import { api } from '../api';
 import { Product } from '../types';
 import { Plus, Trash2, Edit2, X, Check, Package, Search, Upload, Image as ImageIcon } from 'lucide-react';
 
@@ -21,7 +20,7 @@ export default function AdminProducts() {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 800000) { // Limit to ~800KB for Firestore document limit
+      if (file.size > 800000) {
         alert('Image size too large. Please select an image under 800KB.');
         return;
       }
@@ -39,9 +38,8 @@ export default function AdminProducts() {
 
   const fetchProducts = async () => {
     try {
-      const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
-      setProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+      const data = await api.getProducts();
+      setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
     } finally {
@@ -60,9 +58,9 @@ export default function AdminProducts() {
 
     try {
       if (editingProduct) {
-        await updateDoc(doc(db, 'products', editingProduct.id), data);
+        await api.updateProduct(editingProduct.id, data);
       } else {
-        await addDoc(collection(db, 'products'), data);
+        await api.createProduct(data);
       }
       setIsModalOpen(false);
       setEditingProduct(null);
@@ -76,7 +74,7 @@ export default function AdminProducts() {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await deleteDoc(doc(db, 'products', id));
+        await api.deleteProduct(id);
         fetchProducts();
       } catch (error) {
         console.error('Error deleting product:', error);

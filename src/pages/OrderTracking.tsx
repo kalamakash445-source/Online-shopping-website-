@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { api } from '../api';
 import { Order } from '../types';
 import { Package, Truck, CheckCircle, Clock, Search, ArrowLeft, MapPin, Calendar, Smartphone } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -24,10 +23,9 @@ export default function OrderTracking() {
     setLoading(true);
     setError(null);
     try {
-      const docRef = doc(db, 'orders', searchId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setOrder({ id: docSnap.id, ...docSnap.data() } as Order);
+      const data = await api.getOrder(searchId);
+      if (data) {
+        setOrder(data);
       } else {
         setError('Acquisition not found. Please verify your Reference ID.');
         setOrder(null);

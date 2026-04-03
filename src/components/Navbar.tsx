@@ -1,22 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, LogOut, Package, LayoutDashboard, Search } from 'lucide-react';
-import { auth, googleProvider } from '../firebase';
-import { signInWithPopup, signOut } from 'firebase/auth';
+import { ShoppingCart, LogOut, Package, Search } from 'lucide-react';
 import { UserProfile } from '../types';
+import { auth } from '../firebase';
+import { signOut } from 'firebase/auth';
 import SearchOverlay from './SearchOverlay';
 
 export default function Navbar({ user }: { user: UserProfile | null }) {
   const navigate = useNavigate();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-  const handleLogin = async () => {
-    try {
-      await signInWithPopup(auth, googleProvider);
-    } catch (error) {
-      console.error('Login failed:', error);
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -80,12 +72,12 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
               </button>
             </div>
           ) : (
-            <button 
-              onClick={handleLogin}
+            <Link 
+              to="/login"
               className="bg-premium-black text-white px-6 md:px-8 py-2 md:py-3 rounded-full text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-premium-gold transition-all duration-500 shadow-xl shadow-black/10"
             >
               Sign In
-            </button>
+            </Link>
           )}
         </div>
       </div>

@@ -70,7 +70,7 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if isOwner(uid) || isAdmin();
       allow create: if isAuthenticated() && request.auth.uid == uid && 
-                      request.resource.data.role == 'user' &&
+                      (request.resource.data.role == 'user' || isAdmin()) &&
                       isValidEmail(request.resource.data.email);
       allow update: if (isOwner(uid) && request.resource.data.role == resource.data.role) || isAdmin();
     }

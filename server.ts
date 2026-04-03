@@ -2,17 +2,160 @@ import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs/promises";
+import { Product, Order, UserProfile } from "./src/types";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const DATA_DIR = path.join(__dirname, "data");
+const PRODUCTS_FILE = path.join(DATA_DIR, "products.json");
+const ORDERS_FILE = path.join(DATA_DIR, "orders.json");
+const USERS_FILE = path.join(DATA_DIR, "users.json");
+const SETTINGS_FILE = path.join(DATA_DIR, "settings.json");
+
+// Ensure data directory and files exist
+async function initData() {
+  try {
+    await fs.mkdir(DATA_DIR, { recursive: true });
+    for (const file of [PRODUCTS_FILE, ORDERS_FILE, USERS_FILE, SETTINGS_FILE]) {
+      try {
+        await fs.access(file);
+      } catch {
+        const defaultData = file === SETTINGS_FILE ? {} : [];
+        await fs.writeFile(file, JSON.stringify(defaultData));
+      }
+    }
+  } catch (err) {
+    console.error("Failed to initialize data:", err);
+  }
+}
+
+async function readData<T>(file: string): Promise<T[]> {
+  const content = await fs.readFile(file, "utf-8");
+  return JSON.parse(content);
+}
+
+async function writeData<T>(file: string, data: T[]) {
+  await fs.writeFile(file, JSON.stringify(data, null, 2));
+}
+
 async function startServer() {
+  await initData();
   const app = express();
   const PORT = 3000;
 
   app.use(express.json());
 
-  // API Routes
+  // --- API Routes ---
+
+  // Products
+  app.get("/api/products", async (req, res) => {
+    const products = await readData<Product>(PRODUCTS_FILE);
+    res.json(products);
+  });
+
+  app.get("/api/products/:id", async (req, res) => {
+    const products = await readData<Product>(PRODUCTS_FILE);
+    const product = products.find(p => p.id === req.params.id);
+    product ? res.json(product) : res.status(404).json({ error: "Not found" });
+  });
+
+  app.post("/api/products", async (req, res) => {
+    const products = await readData<Product>(PRODUCTS_FILE);
+    const newProduct = { ...req.body, id: Date.now().toString(), createdAt: new Date().toISOString() };
+    products.push(newProduct);
+    await writeData(PRODUCTS_FILE, products);
+    res.status(201).json(newProduct);
+  });
+
+  app.put("/api/products/:id", async (req, res) => {
+    const products = await readData<Product>(PRODUCTS_FILE);
+    const index = products.findIndex(p => p.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: "Not found" });
+    products[index] = { ...products[index], ...req.body };
+    await writeData(PRODUCTS_FILE, products);
+    res.json(products[index]);
+  });
+
+  app.delete("/api/products/:id", async (req, res) => {
+    let products = await readData<Product>(PRODUCTS_FILE);
+    products = products.filter(p => p.id !== req.params.id);
+    await writeData(PRODUCTS_FILE, products);
+    res.status(204).send();
+  });
+
+  // Orders
+  app.get("/api/orders", async (req, res) => {
+    const orders = await readData<Order>(ORDERS_FILE);
+    const { userId } = req.query;
+    if (userId) {
+      return res.json(orders.filter(o => o.userId === userId));
+    }
+    res.json(orders);
+  });
+
+  app.get("/api/orders/:id", async (req, res) => {
+    const orders = await readData<Order>(ORDERS_FILE);
+    const order = orders.find(o => o.id === req.params.id);
+    order ? res.json(order) : res.status(404).json({ error: "Not found" });
+  });
+
+  app.post("/api/orders", async (req, res) => {
+    const orders = await readData<Order>(ORDERS_FILE);
+    const newOrder = { 
+      ...req.body, 
+      id: `ORD-${Math.random().toString(36).substr(2, 9).toUpperCase()}`,
+      createdAt: new Date().toISOString() 
+    };
+    orders.push(newOrder);
+    await writeData(ORDERS_FILE, orders);
+    res.status(201).json(newOrder);
+  });
+
+  app.put("/api/orders/:id", async (req, res) => {
+    const orders = await readData<Order>(ORDERS_FILE);
+    const index = orders.findIndex(o => o.id === req.params.id);
+    if (index === -1) return res.status(404).json({ error: "Not found" });
+    orders[index] = { ...orders[index], ...req.body };
+    await writeData(ORDERS_FILE, orders);
+    res.json(orders[index]);
+  });
+
+  // Auth (Mock)
+  app.post("/api/auth/login", async (req, res) => {
+    const { email, displayName, photoURL, uid } = req.body;
+    const users = await readData<UserProfile>(USERS_FILE);
+    let user = users.find(u => u.uid === uid);
+    
+    if (!user) {
+      user = {
+        uid,
+        email,
+        displayName,
+        photoURL,
+        role: email === 'kalam172010@gmail.com' ? 'admin' : 'user',
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      await writeData(USERS_FILE, users);
+    }
+    res.json(user);
+  });
+
+  // Settings
+  app.get("/api/settings/:id", async (req, res) => {
+    const settings = await fs.readFile(SETTINGS_FILE, "utf-8").then(JSON.parse);
+    res.json(settings[req.params.id] || {});
+  });
+
+  app.post("/api/settings/:id", async (req, res) => {
+    const settings = await fs.readFile(SETTINGS_FILE, "utf-8").then(JSON.parse);
+    settings[req.params.id] = req.body;
+    await writeData(SETTINGS_FILE, settings);
+    res.json(settings[req.params.id]);
+  });
+
   app.get("/api/health", (req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
   });

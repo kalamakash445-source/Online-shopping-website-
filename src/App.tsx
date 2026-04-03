@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
-import { auth, db } from './firebase';
 import { UserProfile } from './types';
+import { api } from './api';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import ProductDetail from './pages/ProductDetail';
@@ -15,7 +13,10 @@ import AdminOrders from './pages/AdminOrders';
 import OrderTracking from './pages/OrderTracking';
 import Login from './pages/Login';
 import BottomNav from './components/BottomNav';
-import { Package, Instagram, Twitter, Facebook, Mail } from 'lucide-react';
+import { Package, Instagram, Twitter, Facebook } from 'lucide-react';
+
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from './firebase';
 
 export default function App() {
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -23,34 +24,26 @@ export default function App() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as UserProfile;
-          // Force admin role for the owner email if not already set
-          if (firebaseUser.email === 'kalam172010@gmail.com' && userData.role !== 'admin') {
-            const updatedUser = { ...userData, role: 'admin' as const };
-            await updateDoc(doc(db, 'users', firebaseUser.uid), { role: 'admin' });
-            setUser(updatedUser);
-          } else {
-            setUser(userData);
-          }
-        } else {
-          const newUser: UserProfile = {
+      try {
+        if (firebaseUser) {
+          // Sync with local backend
+          const syncedUser = await api.login({
             uid: firebaseUser.uid,
             email: firebaseUser.email || '',
             displayName: firebaseUser.displayName || 'User',
             photoURL: firebaseUser.photoURL || '',
-            role: firebaseUser.email === 'kalam172010@gmail.com' ? 'admin' : 'user',
-            createdAt: new Date().toISOString(),
-          };
-          await setDoc(doc(db, 'users', firebaseUser.uid), newUser);
-          setUser(newUser);
+          });
+          setUser(syncedUser);
+        } else {
+          api.logout();
+          setUser(null);
         }
-      } else {
+      } catch (error) {
+        console.error('Auth state change error:', error);
         setUser(null);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, X, ArrowRight, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { collection, getDocs, query, limit } from 'firebase/firestore';
-import { db } from '../firebase';
+import { api } from '../api';
 import { Product } from '../types';
 import { Link } from 'react-router-dom';
 
@@ -31,9 +30,8 @@ export default function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const fetchInitialProducts = async () => {
     setLoading(true);
     try {
-      const q = query(collection(db, 'products'), limit(10));
-      const querySnapshot = await getDocs(q);
-      setProducts(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product)));
+      const data = await api.getProducts();
+      setProducts(data.slice(0, 10));
     } catch (error) {
       console.error('Error fetching search products:', error);
     } finally {

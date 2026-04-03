@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy, limit, addDoc, doc, getDoc, setDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { api } from '../api';
 import { Product, Order, UserProfile } from '../types';
 import { LayoutDashboard, Package, ShoppingCart, Users, TrendingUp, Clock, Settings, Smartphone, Save, QrCode, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -18,28 +17,23 @@ export default function AdminDashboard() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const productsSnap = await getDocs(collection(db, 'products'));
-        const ordersSnap = await getDocs(collection(db, 'orders'));
-        const usersSnap = await getDocs(collection(db, 'users'));
-
-        const orders = ordersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-        const revenue = orders.reduce((sum, order) => sum + order.totalAmount, 0);
+        const products = await api.getProducts();
+        const orders = await api.getOrders();
+        
+        const revenue = orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0);
 
         setStats({
-          products: productsSnap.size,
-          orders: ordersSnap.size,
-          users: usersSnap.size,
+          products: products.length,
+          orders: orders.length,
+          users: 0,
           revenue
         });
 
-        const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(5));
-        const recentSnap = await getDocs(q);
-        setRecentOrders(recentSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order)));
+        setRecentOrders(orders.slice(0, 5));
 
         // Fetch Payment Settings
-        const settingsSnap = await getDoc(doc(db, 'settings', 'payment'));
-        if (settingsSnap.exists()) {
-          const data = settingsSnap.data();
+        const data = await api.getSettings('payment');
+        if (data) {
           setAdminUpiId(data.adminUpiId || '');
           setAdminQrImage(data.adminQrImage || null);
         }
@@ -49,7 +43,6 @@ export default function AdminDashboard() {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
@@ -61,7 +54,7 @@ export default function AdminDashboard() {
   const handleSaveSettings = async () => {
     setIsSavingSettings(true);
     try {
-      await setDoc(doc(db, 'settings', 'payment'), { 
+      await api.updateSettings('payment', { 
         adminUpiId,
         adminQrImage 
       });
@@ -130,7 +123,7 @@ export default function AdminDashboard() {
 
     try {
       for (const product of sampleProducts) {
-        await addDoc(collection(db, 'products'), product);
+        await api.createProduct(product);
       }
       alert('Sample products added successfully!');
       window.location.reload();

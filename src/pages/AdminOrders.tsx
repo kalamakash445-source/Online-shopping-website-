@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
-import { collection, getDocs, updateDoc, doc, query, orderBy } from 'firebase/firestore';
-import { db } from '../firebase';
+import { api } from '../api';
 import { Order } from '../types';
 import { CheckCircle, Truck, Clock, Search, Eye, X } from 'lucide-react';
 
@@ -16,9 +15,8 @@ export default function AdminOrders() {
 
   const fetchOrders = async () => {
     try {
-      const q = query(collection(db, 'orders'), orderBy('createdAt', 'desc'));
-      const querySnapshot = await getDocs(q);
-      setOrders(querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order)));
+      const data = await api.getOrders();
+      setOrders(data);
     } catch (error) {
       console.error('Error fetching orders:', error);
     } finally {
@@ -28,7 +26,7 @@ export default function AdminOrders() {
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     try {
-      await updateDoc(doc(db, 'orders', orderId), { status: newStatus });
+      await api.updateOrder(orderId, { status: newStatus as any });
       fetchOrders();
       if (selectedOrder?.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: newStatus as any });
@@ -40,7 +38,7 @@ export default function AdminOrders() {
 
   const updateTracking = async (orderId: string, trackingNumber: string, estimatedDelivery: string) => {
     try {
-      await updateDoc(doc(db, 'orders', orderId), { 
+      await api.updateOrder(orderId, { 
         trackingNumber, 
         estimatedDelivery 
       });

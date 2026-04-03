@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { collection, addDoc, doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
-import { UserProfile, CartItem } from '../types';
+import { api } from '../api';
+import { UserProfile, CartItem, Order } from '../types';
 import { CreditCard, Truck, CheckCircle, ArrowLeft, Smartphone, QrCode, Copy, Check, X, Maximize2, Package } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
@@ -30,9 +29,8 @@ export default function Checkout({ user }: { user: UserProfile }) {
 
     const fetchAdminUpi = async () => {
       try {
-        const settingsSnap = await getDoc(doc(db, 'settings', 'payment'));
-        if (settingsSnap.exists()) {
-          const data = settingsSnap.data();
+        const data = await api.getSettings('payment');
+        if (data) {
           setAdminUpiId(data.adminUpiId || '');
           setAdminQrImage(data.adminQrImage || null);
         }
@@ -77,15 +75,15 @@ export default function Checkout({ user }: { user: UserProfile }) {
           quantity: item.quantity
         })),
         totalAmount: total,
-        status: paymentMethod === 'upi' ? 'payment_pending' : 'pending',
+        status: (paymentMethod === 'upi' ? 'payment_pending' : 'pending') as Order['status'],
         shippingAddress: address,
         paymentMethod,
         upiId: paymentMethod === 'upi' ? upiId : null,
         createdAt: new Date().toISOString()
       };
 
-      const docRef = await addDoc(collection(db, 'orders'), orderData);
-      setOrderId(docRef.id);
+      const newOrder = await api.createOrder(orderData);
+      setOrderId(newOrder.id);
       localStorage.removeItem('cart');
       setIsSuccess(true);
     } catch (error) {

@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
-import { db } from '../firebase';
 import { Product } from '../types';
+import { api } from '../api';
 import ProductCard from '../components/ProductCard';
-import { Search, Filter, Star } from 'lucide-react';
+import { Search } from 'lucide-react';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -14,12 +13,7 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const q = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        const productsData = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Product[];
+        const productsData = await api.getProducts();
         setProducts(productsData);
       } catch (error) {
         console.error('Error fetching products:', error);
