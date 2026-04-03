@@ -50,7 +50,7 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
             <ShoppingCart size={20} md:size={22} strokeWidth={1.5} />
           </Link>
 
-          {user ? (
+          {user && (
             <div className="flex items-center space-x-3 md:space-x-4 pl-3 md:pl-4 border-l border-gray-200">
               <div className="flex items-center space-x-2 md:space-x-3 group cursor-pointer">
                 <img 
@@ -71,13 +71,6 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
                 <LogOut size={18} md:size={20} strokeWidth={1.5} />
               </button>
             </div>
-          ) : (
-            <Link 
-              to="/login"
-              className="bg-premium-black text-white px-6 md:px-8 py-2 md:py-3 rounded-full text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-premium-gold transition-all duration-500 shadow-xl shadow-black/10"
-            >
-              Sign In
-            </Link>
           )}
         </div>
       </div>

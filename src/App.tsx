@@ -11,7 +11,6 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
 import OrderTracking from './pages/OrderTracking';
-import Login from './pages/Login';
 import BottomNav from './components/BottomNav';
 import { Package, Instagram, Twitter, Facebook } from 'lucide-react';
 
@@ -60,8 +59,7 @@ export default function App() {
   }
 
   const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
-    if (!user) return <Navigate to="/login" />;
-    if (adminOnly && user.role !== 'admin') return <Navigate to="/" />;
+    if (adminOnly && (!user || user.role !== 'admin')) return <Navigate to="/" />;
     return children;
   };
 
@@ -74,8 +72,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="/login" element={<Login user={user} />} />
-            <Route path="/checkout" element={<ProtectedRoute><Checkout user={user} /></ProtectedRoute>} />
+            <Route path="/checkout" element={<Checkout user={user} />} />
             <Route path="/track" element={<OrderTracking />} />
             <Route path="/track/:id" element={<OrderTracking />} />
             
