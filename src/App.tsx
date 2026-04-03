@@ -49,6 +49,8 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  // We still keep the loading state for the initial auth check, 
+  // but we won't redirect to login anymore.
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -81,6 +83,7 @@ export default function App() {
             <Route path="/admin" element={<ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>} />
             <Route path="/admin/products" element={<ProtectedRoute adminOnly><AdminProducts /></ProtectedRoute>} />
             <Route path="/admin/orders" element={<ProtectedRoute adminOnly><AdminOrders /></ProtectedRoute>} />
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </main>
         <BottomNav user={user} />
@@ -124,6 +127,7 @@ export default function App() {
               <div className="space-y-6">
                 <h4 className="text-[10px] font-bold tracking-[0.2em] uppercase text-premium-gold">Support</h4>
                 <ul className="space-y-4 text-sm text-gray-400">
+                  <li><Link to="/track" className="hover:text-white transition-colors">Order Tracking</Link></li>
                   <li><Link to="/" className="hover:text-white transition-colors">Shipping</Link></li>
                   <li><Link to="/" className="hover:text-white transition-colors">Returns</Link></li>
                   <li><Link to="/" className="hover:text-white transition-colors">Contact</Link></li>

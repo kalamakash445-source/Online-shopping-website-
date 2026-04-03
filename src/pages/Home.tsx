@@ -114,6 +114,30 @@ export default function Home() {
         ))}
       </div>
 
+      {/* Track Your Order Section */}
+      <div className="bg-premium-gray rounded-[2.5rem] p-12 md:p-20 text-center space-y-8">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <p className="text-premium-gold font-bold tracking-[0.3em] uppercase text-[10px]">Order Management</p>
+          <h2 className="text-4xl md:text-6xl font-display font-black text-premium-black tracking-tighter leading-none">
+            Track Your <span className="text-premium-gold italic">Acquisition</span>
+          </h2>
+          <p className="text-gray-500 font-medium text-sm md:text-lg">
+            Monitor the journey of your curated essentials in real-time. Simply enter your Reference ID to see the current status of your delivery.
+          </p>
+          <div className="pt-4">
+            <a 
+              href="/track" 
+              className="inline-flex items-center space-x-4 bg-premium-black text-white px-10 py-5 rounded-full font-bold tracking-widest uppercase text-xs hover:bg-premium-gold transition-all duration-500 shadow-2xl shadow-black/10"
+            >
+              <span>Track Now</span>
+              <div className="w-6 h-6 bg-white/10 rounded-full flex items-center justify-center">
+                <Search size={12} />
+              </div>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {filteredProducts.length === 0 && (
         <div className="text-center py-40">
           <p className="text-gray-300 font-display text-3xl font-light tracking-tight">

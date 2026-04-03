@@ -31,6 +31,11 @@ export default function BottomNav({ user }: { user: UserProfile | null }) {
           <span className="text-[10px] font-bold uppercase tracking-widest">Bag</span>
         </Link>
 
+        <Link to="/track" className={`flex flex-col items-center space-y-1 ${isActive('/track') ? 'text-premium-gold' : 'text-gray-400'}`}>
+          <Package size={20} strokeWidth={isActive('/track') ? 2.5 : 2} />
+          <span className="text-[10px] font-bold uppercase tracking-widest">Track</span>
+        </Link>
+
         {user?.role === 'admin' && (
           <Link to="/admin" className={`flex flex-col items-center space-y-1 ${isActive('/admin') ? 'text-premium-gold' : 'text-gray-400'}`}>
             <LayoutDashboard size={20} strokeWidth={isActive('/admin') ? 2.5 : 2} />

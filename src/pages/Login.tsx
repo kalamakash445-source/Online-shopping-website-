@@ -30,16 +30,12 @@ export default function Login({ user }: { user: UserProfile | null }) {
     } catch (err: any) {
       console.error('Auth failed:', err);
       let message = 'Authentication failed. Please try again.';
-      if (err.code === 'auth/user-not-found') {
-        message = 'No user found with this email.';
-      } else if (err.code === 'auth/wrong-password') {
-        message = 'Incorrect password.';
+      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
+        message = 'Invalid email or password. If you haven\'t created an account yet, please Sign Up first. Also, ensure "Email/Password" is enabled in your Firebase Console.';
       } else if (err.code === 'auth/email-already-in-use') {
         message = 'This email is already in use.';
       } else if (err.code === 'auth/weak-password') {
         message = 'Password should be at least 6 characters.';
-      } else if (err.code === 'auth/invalid-credential') {
-        message = 'Invalid email or password. Please check your credentials and try again.';
       } else if (err.message) {
         message = err.message;
       }
