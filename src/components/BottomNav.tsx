@@ -42,6 +42,11 @@ export default function BottomNav({ user }: { user: UserProfile | null }) {
             <span className="text-[10px] font-bold uppercase tracking-widest">Admin</span>
           </Link>
         )}
+
+        <Link to={user ? "/profile" : "/login"} className={`flex flex-col items-center space-y-1 ${isActive('/login') || isActive('/profile') ? 'text-premium-gold' : 'text-gray-400'}`}>
+          <User size={20} strokeWidth={isActive('/login') || isActive('/profile') ? 2.5 : 2} />
+          <span className="text-[10px] font-bold uppercase tracking-widest">{user ? 'You' : 'Login'}</span>
+        </Link>
       </div>
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>

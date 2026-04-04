@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trash2, ShoppingBag, ArrowRight, Minus, Plus } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, Minus, Plus, ArrowLeft } from 'lucide-react';
 import { CartItem } from '../types';
 
 export default function Cart() {
@@ -51,7 +51,17 @@ export default function Cart() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 pb-20">
+    <div className="max-w-7xl mx-auto space-y-12 md:space-y-16 pb-20">
+      <button 
+        onClick={() => navigate(-1)} 
+        className="flex items-center space-x-3 text-gray-400 hover:text-premium-black transition-all duration-300 group"
+      >
+        <div className="p-2 bg-white rounded-full shadow-sm border border-gray-100 group-hover:bg-premium-black group-hover:text-white transition-all duration-500">
+          <ArrowLeft size={16} />
+        </div>
+        <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Continue Shopping</span>
+      </button>
+
       <div className="flex items-baseline justify-between border-b border-gray-100 pb-10">
         <h1 className="text-6xl font-display font-black text-premium-black tracking-tighter">Shopping Bag</h1>
         <span className="text-gray-400 font-bold tracking-widest uppercase text-[10px]">{cart.length} Items Selected</span>

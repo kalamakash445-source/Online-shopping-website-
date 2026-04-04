@@ -6,14 +6,10 @@ import { CreditCard, Truck, CheckCircle, ArrowLeft, Smartphone, QrCode, Copy, Ch
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
 
-export default function Checkout({ user }: { user: UserProfile | null }) {
+export default function Checkout({ user }: { user: UserProfile }) {
   const navigate = useNavigate();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [address, setAddress] = useState({ 
-    name: user?.displayName || '', 
-    address: '', 
-    phone: '' 
-  });
+  const [address, setAddress] = useState({ name: user.displayName, address: '', phone: '' });
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online' | 'upi'>('cod');
   const [upiId, setUpiId] = useState('');
   const [adminUpiId, setAdminUpiId] = useState('');

@@ -11,7 +11,9 @@ import AdminDashboard from './pages/AdminDashboard';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
 import OrderTracking from './pages/OrderTracking';
+import Login from './pages/Login';
 import BottomNav from './components/BottomNav';
+import StyleAssistant from './components/StyleAssistant';
 import { Package, Instagram, Twitter, Facebook } from 'lucide-react';
 
 import { onAuthStateChanged } from 'firebase/auth';
@@ -59,7 +61,8 @@ export default function App() {
   }
 
   const ProtectedRoute = ({ children, adminOnly = false }: { children: React.ReactNode, adminOnly?: boolean }) => {
-    if (adminOnly && (!user || user.role !== 'admin')) return <Navigate to="/" />;
+    if (!user) return <Navigate to="/login" />;
+    if (adminOnly && user.role !== 'admin') return <Navigate to="/" />;
     return children;
   };
 
@@ -72,7 +75,8 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/product/:id" element={<ProductDetail />} />
             <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout user={user} />} />
+            <Route path="/login" element={<Login user={user} />} />
+            <Route path="/checkout" element={<ProtectedRoute><Checkout user={user} /></ProtectedRoute>} />
             <Route path="/track" element={<OrderTracking />} />
             <Route path="/track/:id" element={<OrderTracking />} />
             
@@ -84,6 +88,7 @@ export default function App() {
           </Routes>
         </main>
         <BottomNav user={user} />
+        <StyleAssistant />
         <footer className="bg-premium-black text-white py-20 hidden md:block">
           <div className="container mx-auto px-6">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20">

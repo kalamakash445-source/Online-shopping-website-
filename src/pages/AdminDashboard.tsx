@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
 import { Product, Order, UserProfile } from '../types';
-import { LayoutDashboard, Package, ShoppingCart, Users, TrendingUp, Clock, Settings, Smartphone, Save, QrCode, Search } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, TrendingUp, Clock, Settings, Smartphone, Save, QrCode, Search, ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { QRCodeSVG } from 'qrcode.react';
 
@@ -139,7 +139,17 @@ export default function AdminDashboard() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 pb-20">
+    <div className="max-w-7xl mx-auto space-y-12 md:space-y-16 pb-20">
+      <Link 
+        to="/" 
+        className="flex items-center space-x-3 text-gray-400 hover:text-premium-black transition-all duration-300 group"
+      >
+        <div className="p-2 bg-white rounded-full shadow-sm border border-gray-100 group-hover:bg-premium-black group-hover:text-white transition-all duration-500">
+          <ArrowLeft size={16} />
+        </div>
+        <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back to Boutique</span>
+      </Link>
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-gray-100 pb-10">
         <div>
           <p className="text-[10px] font-bold text-premium-gold uppercase tracking-[0.3em] mb-3">Management Console</p>

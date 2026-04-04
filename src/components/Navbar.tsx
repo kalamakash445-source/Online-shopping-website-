@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, LogOut, Package, Search } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { ShoppingCart, LogOut, Package, Search, ArrowLeft } from 'lucide-react';
 import { UserProfile } from '../types';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
@@ -8,7 +8,10 @@ import SearchOverlay from './SearchOverlay';
 
 export default function Navbar({ user }: { user: UserProfile | null }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+
+  const isHomePage = location.pathname === '/';
 
   const handleLogout = async () => {
     try {
@@ -22,14 +25,25 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
   return (
     <nav className="fixed top-0 left-0 right-0 z-[100] glass border-b border-gray-100/50">
       <div className="container mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2 group">
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-premium-black rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
-            <Package className="text-white" size={16} />
-          </div>
-          <span className="text-lg md:text-2xl font-display font-black tracking-tighter text-premium-black uppercase">
-            Bazaar<span className="text-premium-gold">.</span>
-          </span>
-        </Link>
+        <div className="flex items-center space-x-4">
+          {!isHomePage && (
+            <button 
+              onClick={() => navigate(-1)}
+              className="p-2 text-gray-400 hover:text-premium-black transition-colors md:hidden"
+              title="Back"
+            >
+              <ArrowLeft size={20} strokeWidth={1.5} />
+            </button>
+          )}
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-premium-black rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+              <Package className="text-white" size={16} />
+            </div>
+            <span className="text-lg md:text-2xl font-display font-black tracking-tighter text-premium-black uppercase">
+              Bazaar<span className="text-premium-gold">.</span>
+            </span>
+          </Link>
+        </div>
 
         <div className="hidden md:flex items-center space-x-10 text-[10px] font-bold tracking-[0.2em] uppercase text-gray-400">
           <Link to="/" className="hover:text-premium-black transition-colors">Collection</Link>
@@ -50,7 +64,7 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
             <ShoppingCart size={20} md:size={22} strokeWidth={1.5} />
           </Link>
 
-          {user && (
+          {user ? (
             <div className="flex items-center space-x-3 md:space-x-4 pl-3 md:pl-4 border-l border-gray-200">
               <div className="flex items-center space-x-2 md:space-x-3 group cursor-pointer">
                 <img 
@@ -71,6 +85,13 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
                 <LogOut size={18} md:size={20} strokeWidth={1.5} />
               </button>
             </div>
+          ) : (
+            <Link 
+              to="/login"
+              className="bg-premium-black text-white px-6 md:px-8 py-2 md:py-3 rounded-full text-[8px] md:text-[10px] font-bold tracking-[0.2em] uppercase hover:bg-premium-gold transition-all duration-500 shadow-xl shadow-black/10"
+            >
+              Sign In
+            </Link>
           )}
         </div>
       </div>

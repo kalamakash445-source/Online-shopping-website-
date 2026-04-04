@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
 import { Product } from '../types';
-import { Plus, Trash2, Edit2, X, Check, Package, Search, Upload, Image as ImageIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Plus, Trash2, Edit2, X, Check, Package, Search, Upload, Image as ImageIcon, ArrowLeft } from 'lucide-react';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -102,7 +103,17 @@ export default function AdminProducts() {
   );
 
   return (
-    <div className="max-w-7xl mx-auto space-y-16 pb-20">
+    <div className="max-w-7xl mx-auto space-y-12 md:space-y-16 pb-20">
+      <Link 
+        to="/admin" 
+        className="flex items-center space-x-3 text-gray-400 hover:text-premium-black transition-all duration-300 group"
+      >
+        <div className="p-2 bg-white rounded-full shadow-sm border border-gray-100 group-hover:bg-premium-black group-hover:text-white transition-all duration-500">
+          <ArrowLeft size={16} />
+        </div>
+        <span className="text-[10px] font-bold tracking-[0.2em] uppercase">Back to Dashboard</span>
+      </Link>
+
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 border-b border-gray-100 pb-10">
         <div>
           <p className="text-[10px] font-bold text-premium-gold uppercase tracking-[0.3em] mb-3">Inventory Management</p>
