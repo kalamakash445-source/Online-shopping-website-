@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
-import { Navigate, Link, useNavigate } from 'react-router-dom';
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword
-} from 'firebase/auth';
-import { auth } from '../firebase';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { api } from '../api';
 import { UserProfile } from '../types';
 import { LogIn, AlertCircle, Loader2, UserPlus, ArrowRight, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -12,8 +8,10 @@ import { motion, AnimatePresence } from 'motion/react';
 export default function Login({ user }: { user: UserProfile | null }) {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -25,21 +23,13 @@ export default function Login({ user }: { user: UserProfile | null }) {
     setError(null);
     try {
       if (isSignUp) {
-        await createUserWithEmailAndPassword(auth, email, password);
+        await api.register({ username, password, email, displayName });
       } else {
-        await signInWithEmailAndPassword(auth, email, password);
+        await api.login({ username, password });
       }
+      window.location.reload(); // Refresh to update user state
     } catch (err: any) {
-      console.error('Auth failed:', err);
-      let message = 'Authentication failed. Please try again.';
-      if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
-        message = 'Invalid email or password. Please check your credentials or sign up if you are new.';
-      } else if (err.code === 'auth/email-already-in-use') {
-        message = 'This email is already registered. Please sign in instead.';
-      } else if (err.code === 'auth/weak-password') {
-        message = 'Password is too weak. Please use at least 6 characters.';
-      }
-      setError(message);
+      setError(err.message || 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -73,19 +63,20 @@ export default function Login({ user }: { user: UserProfile | null }) {
             />
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-premium-black via-transparent to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-vibrant-pink/20 via-vibrant-purple/20 to-vibrant-blue/20 mix-blend-overlay" />
           
           <div className="absolute bottom-12 left-12 right-12 text-white">
             <div className="flex items-center space-x-2 mb-6">
-              <div className="w-10 h-10 bg-premium-gold rounded-xl flex items-center justify-center">
-                <ShoppingBag className="text-premium-black" size={20} />
+              <div className="w-10 h-10 vibrant-gradient rounded-xl flex items-center justify-center shadow-lg shadow-vibrant-pink/20">
+                <ShoppingBag className="text-white" size={20} />
               </div>
               <span className="text-2xl font-display font-black tracking-tighter uppercase">
-                Bazaar<span className="text-premium-gold">.</span>
+                Bazaar<span className="vibrant-text-gradient">.</span>
               </span>
             </div>
             <h2 className="text-4xl font-bold leading-tight mb-4 tracking-tight">
               Elevate Your <br />
-              <span className="text-premium-gold italic">Shopping Experience</span>
+              <span className="vibrant-text-gradient italic">Shopping Experience</span>
             </h2>
             <p className="text-gray-400 text-lg max-w-sm font-light">
               Join our exclusive community and discover a curated world of premium essentials.
@@ -120,31 +111,53 @@ export default function Login({ user }: { user: UserProfile | null }) {
 
           <form onSubmit={handleAuth} className="space-y-6">
             <div className="space-y-1">
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Email Address</label>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Username</label>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-premium-gold focus:ring-4 focus:ring-premium-gold/10 transition-all outline-none text-sm font-medium"
-                placeholder="name@example.com"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-vibrant-pink focus:ring-4 focus:ring-vibrant-pink/10 transition-all outline-none text-sm font-medium"
+                placeholder="Choose a username"
                 required
               />
             </div>
+
+            {isSignUp && (
+              <>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Full Name</label>
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-vibrant-blue focus:ring-4 focus:ring-vibrant-blue/10 transition-all outline-none text-sm font-medium"
+                    placeholder="Your full name"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] mb-2">Email Address</label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-vibrant-purple focus:ring-4 focus:ring-vibrant-purple/10 transition-all outline-none text-sm font-medium"
+                    placeholder="name@example.com"
+                    required
+                  />
+                </div>
+              </>
+            )}
             
             <div className="space-y-1">
               <div className="flex items-center justify-between mb-2">
                 <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Password</label>
-                {!isSignUp && (
-                  <button type="button" className="text-[10px] font-bold text-premium-gold uppercase tracking-widest hover:underline">
-                    Forgot?
-                  </button>
-                )}
               </div>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-premium-gold focus:ring-4 focus:ring-premium-gold/10 transition-all outline-none text-sm font-medium"
+                className="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-vibrant-orange focus:ring-4 focus:ring-vibrant-orange/10 transition-all outline-none text-sm font-medium"
                 placeholder="••••••••"
                 required
               />
@@ -153,7 +166,7 @@ export default function Login({ user }: { user: UserProfile | null }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-premium-black text-white px-8 py-4 rounded-2xl hover:bg-premium-gold hover:text-premium-black transition-all duration-500 font-bold text-xs tracking-[0.2em] uppercase disabled:opacity-50 flex items-center justify-center space-x-2 group shadow-xl shadow-black/5"
+              className="w-full vibrant-gradient text-white px-8 py-4 rounded-2xl hover:scale-[1.02] transition-all duration-500 font-bold text-xs tracking-[0.2em] uppercase disabled:opacity-50 flex items-center justify-center space-x-2 group shadow-xl shadow-vibrant-pink/20"
             >
               {loading ? (
                 <Loader2 className="animate-spin" size={20} />

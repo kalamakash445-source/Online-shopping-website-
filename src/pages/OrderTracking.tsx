@@ -92,8 +92,9 @@ export default function OrderTracking() {
 
       {order && (
         <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
           className="bg-white rounded-[3rem] shadow-2xl shadow-black/[0.03] border border-gray-50 overflow-hidden"
         >
           <div className="p-10 bg-premium-black text-white flex flex-col md:flex-row justify-between items-start md:items-center gap-6">

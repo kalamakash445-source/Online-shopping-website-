@@ -5,6 +5,7 @@ import { UserProfile } from '../types';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
 import SearchOverlay from './SearchOverlay';
+import { motion } from 'motion/react';
 
 export default function Navbar({ user }: { user: UserProfile | null }) {
   const navigate = useNavigate();
@@ -23,7 +24,12 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[100] glass border-b border-gray-100/50">
+    <motion.nav 
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+      className="fixed top-0 left-0 right-0 z-[100] glass border-b border-gray-100/50"
+    >
       <div className="container mx-auto px-6 h-16 md:h-20 flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {!isHomePage && (
@@ -36,11 +42,11 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
             </button>
           )}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-premium-black rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+            <div className="w-8 h-8 md:w-10 md:h-10 vibrant-gradient rounded-lg md:rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-500 shadow-lg shadow-vibrant-pink/20">
               <Package className="text-white" size={16} />
             </div>
             <span className="text-lg md:text-2xl font-display font-black tracking-tighter text-premium-black uppercase">
-              Bazaar<span className="text-premium-gold">.</span>
+              Bazaar<span className="vibrant-text-gradient">.</span>
             </span>
           </Link>
         </div>
@@ -96,6 +102,6 @@ export default function Navbar({ user }: { user: UserProfile | null }) {
         </div>
       </div>
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
-    </nav>
+    </motion.nav>
   );
 }

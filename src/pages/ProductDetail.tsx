@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Product, CartItem } from '../types';
 import { api } from '../api';
 import { Star, ShoppingCart, ArrowLeft, ShieldCheck, Truck, Check } from 'lucide-react';
+import { motion } from 'motion/react';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -75,7 +76,12 @@ export default function ProductDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16">
         {/* Product Image Gallery */}
-        <div className="lg:col-span-7 space-y-6 md:space-y-8">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+          className="lg:col-span-7 space-y-6 md:space-y-8"
+        >
           <div className="bg-premium-gray rounded-[2rem] md:rounded-[3rem] overflow-hidden aspect-[4/5] flex items-center justify-center p-8 md:p-12 group">
             <img
               src={product.image}
@@ -92,17 +98,22 @@ export default function ProductDetail() {
               </div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
         {/* Product Info */}
-        <div className="lg:col-span-5 space-y-8 md:space-y-12">
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
+          className="lg:col-span-5 space-y-8 md:space-y-12"
+        >
           <div className="space-y-4 md:space-y-6">
             <div className="flex items-center justify-between">
-              <span className="text-premium-gold font-bold tracking-[0.3em] uppercase text-[8px] md:text-[10px]">
+              <span className="vibrant-text-gradient font-bold tracking-[0.3em] uppercase text-[8px] md:text-[10px]">
                 {product.category}
               </span>
               <div className="flex items-center space-x-1">
-                <Star className="text-premium-gold fill-premium-gold" size={10} md:size={12} />
+                <Star className="text-vibrant-pink fill-vibrant-pink" size={10} md:size={12} />
                 <span className="text-[10px] md:text-xs font-bold text-premium-black">{product.rating || 4.5}</span>
                 <span className="text-[8px] md:text-[10px] text-gray-400 font-medium tracking-wider uppercase ml-2">(120 Reviews)</span>
               </div>
@@ -125,7 +136,7 @@ export default function ProductDetail() {
               <span className="text-gray-300 line-through text-lg md:text-2xl font-medium">
                 ₹{(product.price * 1.2).toLocaleString('en-IN')}
               </span>
-              <div className="bg-premium-gold/10 text-premium-gold px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[10px] font-bold tracking-widest uppercase">
+              <div className="vibrant-gradient text-white px-2 md:px-3 py-1 rounded-full text-[8px] md:text-[10px] font-bold tracking-widest uppercase shadow-lg shadow-vibrant-pink/20">
                 20% OFF
               </div>
             </div>
@@ -149,7 +160,7 @@ export default function ProductDetail() {
               
               <button
                 onClick={addToCart}
-                className="w-full flex items-center justify-center space-x-4 bg-premium-black text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-bold tracking-widest uppercase text-[10px] md:text-xs hover:bg-premium-gold transition-all duration-500 shadow-2xl shadow-black/10 active:scale-95"
+                className="w-full flex items-center justify-center space-x-4 vibrant-gradient text-white px-8 md:px-12 py-4 md:py-5 rounded-full font-bold tracking-widest uppercase text-[10px] md:text-xs hover:scale-105 transition-all duration-500 shadow-2xl shadow-vibrant-pink/30 active:scale-95"
               >
                 <ShoppingCart size={16} md:size={18} strokeWidth={2} />
                 <span>Add to Bag</span>
@@ -162,30 +173,30 @@ export default function ProductDetail() {
             <div className="flex items-center justify-between p-4 md:p-6 bg-premium-gray rounded-2xl md:rounded-3xl">
               <div className="flex items-center space-x-3 md:space-x-4">
                 <div className="p-2 md:p-3 bg-white rounded-xl md:rounded-2xl shadow-sm">
-                  <ShieldCheck className="text-premium-gold" size={16} md:size={20} />
+                  <ShieldCheck className="text-vibrant-blue" size={16} md:size={20} />
                 </div>
                 <div>
                   <p className="text-[8px] md:text-[10px] font-bold tracking-widest uppercase text-premium-black">Warranty</p>
                   <p className="text-[10px] md:text-xs text-gray-400 font-medium">1 Year International</p>
                 </div>
               </div>
-              <Check className="text-premium-gold" size={14} md:size={16} />
+              <Check className="text-vibrant-green" size={14} md:size={16} />
             </div>
             
             <div className="flex items-center justify-between p-4 md:p-6 bg-premium-gray rounded-2xl md:rounded-3xl">
               <div className="flex items-center space-x-3 md:space-x-4">
                 <div className="p-2 md:p-3 bg-white rounded-xl md:rounded-2xl shadow-sm">
-                  <Truck className="text-premium-gold" size={16} md:size={20} />
+                  <Truck className="text-vibrant-purple" size={16} md:size={20} />
                 </div>
                 <div>
                   <p className="text-[8px] md:text-[10px] font-bold tracking-widest uppercase text-premium-black">Shipping</p>
                   <p className="text-[10px] md:text-xs text-gray-400 font-medium">Complimentary Express</p>
                 </div>
               </div>
-              <Check className="text-premium-gold" size={14} md:size={16} />
+              <Check className="text-vibrant-green" size={14} md:size={16} />
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -6,10 +6,15 @@ import { CreditCard, Truck, CheckCircle, ArrowLeft, Smartphone, QrCode, Copy, Ch
 import { motion, AnimatePresence } from 'motion/react';
 import { QRCodeSVG } from 'qrcode.react';
 
-export default function Checkout({ user }: { user: UserProfile }) {
+export default function Checkout({ user }: { user: UserProfile | null }) {
   const navigate = useNavigate();
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [address, setAddress] = useState({ name: user.displayName, address: '', phone: '' });
+  const [address, setAddress] = useState({ 
+    name: user?.displayName || '', 
+    email: user?.email || '',
+    address: '', 
+    phone: '' 
+  });
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'online' | 'upi'>('cod');
   const [upiId, setUpiId] = useState('');
   const [adminUpiId, setAdminUpiId] = useState('');
@@ -67,7 +72,7 @@ export default function Checkout({ user }: { user: UserProfile }) {
     setIsSubmitting(true);
     try {
       const orderData = {
-        userId: user.uid,
+        userId: user?.uid || 'guest',
         items: cart.map(item => ({
           productId: item.id,
           name: item.name,
@@ -97,25 +102,28 @@ export default function Checkout({ user }: { user: UserProfile }) {
     return (
       <div className="max-w-4xl mx-auto py-20 px-6 animate-in fade-in zoom-in duration-700">
         <div className="bg-white rounded-[3.5rem] shadow-2xl shadow-black/[0.05] border border-gray-50 overflow-hidden">
-          <div className="bg-premium-black text-white p-16 text-center space-y-6">
-            <div className="w-20 h-20 bg-premium-gold rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+          <div className="bg-premium-black text-white p-16 text-center space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-vibrant-pink/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-vibrant-blue/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl"></div>
+            
+            <div className="w-20 h-20 vibrant-gradient rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce shadow-xl shadow-vibrant-pink/30 relative z-10">
               <CheckCircle className="text-white" size={40} strokeWidth={1.5} />
             </div>
-            <h1 className="text-5xl font-display font-black tracking-tighter">
+            <h1 className="text-5xl font-display font-black tracking-tighter relative z-10">
               {paymentMethod === 'upi' ? 'Payment Received' : 'Order Confirmed'}
             </h1>
-            <p className="text-gray-400 font-medium max-w-md mx-auto">
+            <p className="text-gray-400 font-medium max-w-md mx-auto relative z-10">
               {paymentMethod === 'upi' 
                 ? "Thank you for your payment. Your acquisition is now pending admin verification. You'll be notified once confirmed."
                 : "Thank you for your acquisition. Your order has been received and is being prepared for express delivery."}
             </p>
-            <div className="inline-block px-6 py-2 bg-white/10 rounded-full border border-white/10">
-              <p className="text-[10px] font-bold tracking-widest uppercase text-premium-gold">Order ID: #{orderId?.slice(0, 12).toUpperCase()}</p>
+            <div className="inline-block px-6 py-2 bg-white/10 rounded-full border border-white/10 relative z-10">
+              <p className="text-[10px] font-bold tracking-widest uppercase vibrant-text-gradient">Order ID: #{orderId?.slice(0, 12).toUpperCase()}</p>
             </div>
-            <div className="pt-4">
+            <div className="pt-4 relative z-10">
               <Link 
                 to={`/track/${orderId}`}
-                className="inline-flex items-center space-x-3 px-10 py-4 bg-premium-gold text-white rounded-full font-bold text-[10px] tracking-widest uppercase hover:bg-white hover:text-premium-black transition-all duration-500 shadow-xl shadow-premium-gold/20"
+                className="inline-flex items-center space-x-3 px-10 py-4 vibrant-gradient text-white rounded-full font-bold text-[10px] tracking-widest uppercase hover:scale-105 transition-all duration-500 shadow-xl shadow-vibrant-pink/20"
               >
                 <Package size={14} />
                 <span>Track Acquisition</span>
@@ -142,7 +150,7 @@ export default function Checkout({ user }: { user: UserProfile }) {
                   ))}
                   <div className="flex justify-between items-center pt-6">
                     <p className="text-lg font-bold text-premium-black">Total Value</p>
-                    <p className="text-3xl font-display font-black text-premium-gold">₹{total.toLocaleString('en-IN')}</p>
+                    <p className="text-3xl font-display font-black vibrant-text-gradient">₹{total.toLocaleString('en-IN')}</p>
                   </div>
                 </div>
               </div>
@@ -184,7 +192,7 @@ export default function Checkout({ user }: { user: UserProfile }) {
           <div className="p-16 bg-gray-50 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="flex items-center space-x-4 text-gray-400">
               <CheckCircle size={20} className="text-green-500" />
-              <p className="text-xs font-medium">A confirmation email has been sent to {user.email}</p>
+              <p className="text-xs font-medium">A confirmation email has been sent to {user?.email || address.email}</p>
             </div>
             <button 
               onClick={() => navigate('/')}
@@ -213,7 +221,12 @@ export default function Checkout({ user }: { user: UserProfile }) {
       </div>
 
       <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-20">
-        <div className="lg:col-span-8 space-y-12">
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+          className="lg:col-span-8 space-y-12"
+        >
           {/* Shipping Address */}
           <div className="space-y-10">
             <div className="flex items-center space-x-4">
@@ -230,9 +243,21 @@ export default function Checkout({ user }: { user: UserProfile }) {
                   type="text"
                   required
                   placeholder="Full Name"
-                  className="w-full px-6 py-4 rounded-2xl bg-premium-gray border-none focus:ring-2 focus:ring-premium-gold outline-none font-medium"
+                  className="w-full px-6 py-4 rounded-2xl bg-premium-gray border-none focus:ring-2 focus:ring-vibrant-pink outline-none font-medium"
                   value={address.name}
                   onChange={(e) => setAddress({ ...address, name: e.target.value })}
+                />
+              </div>
+              <div className="space-y-3">
+                <label className="text-[10px] font-bold tracking-widest uppercase text-gray-400">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="name@example.com"
+                  className="w-full px-6 py-4 rounded-2xl bg-premium-gray border-none focus:ring-2 focus:ring-vibrant-blue outline-none font-medium"
+                  value={address.email}
+                  onChange={(e) => setAddress({ ...address, email: e.target.value })}
+                  disabled={!!user}
                 />
               </div>
               <div className="space-y-3">
@@ -241,7 +266,7 @@ export default function Checkout({ user }: { user: UserProfile }) {
                   type="tel"
                   required
                   placeholder="+91 00000 00000"
-                  className="w-full px-6 py-4 rounded-2xl bg-premium-gray border-none focus:ring-2 focus:ring-premium-gold outline-none font-medium"
+                  className="w-full px-6 py-4 rounded-2xl bg-premium-gray border-none focus:ring-2 focus:ring-vibrant-purple outline-none font-medium"
                   value={address.phone}
                   onChange={(e) => setAddress({ ...address, phone: e.target.value })}
                 />
@@ -252,7 +277,7 @@ export default function Checkout({ user }: { user: UserProfile }) {
                   required
                   rows={3}
                   placeholder="Street, Landmark, City, Pincode"
-                  className="w-full px-6 py-4 rounded-2xl bg-premium-gray border-none focus:ring-2 focus:ring-premium-gold outline-none font-medium"
+                  className="w-full px-6 py-4 rounded-2xl bg-premium-gray border-none focus:ring-2 focus:ring-vibrant-orange outline-none font-medium"
                   value={address.address}
                   onChange={(e) => setAddress({ ...address, address: e.target.value })}
                 />
@@ -270,25 +295,25 @@ export default function Checkout({ user }: { user: UserProfile }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <label className={`flex items-center space-x-6 p-8 rounded-[2rem] border-2 cursor-pointer transition-all duration-500 ${paymentMethod === 'cod' ? 'border-premium-black bg-premium-black text-white' : 'border-premium-gray hover:border-gray-200'}`}>
+              <label className={`flex items-center space-x-6 p-8 rounded-[2rem] border-2 cursor-pointer transition-all duration-500 ${paymentMethod === 'cod' ? 'border-vibrant-blue bg-vibrant-blue text-white shadow-xl shadow-vibrant-blue/20' : 'border-premium-gray hover:border-gray-200'}`}>
                 <input type="radio" name="payment" className="hidden" checked={paymentMethod === 'cod'} onChange={() => setPaymentMethod('cod')} />
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cod' ? 'border-premium-gold' : 'border-gray-300'}`}>
-                  {paymentMethod === 'cod' && <div className="w-3 h-3 bg-premium-gold rounded-full" />}
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'cod' ? 'border-white' : 'border-gray-300'}`}>
+                  {paymentMethod === 'cod' && <div className="w-3 h-3 bg-white rounded-full" />}
                 </div>
                 <div>
                   <p className="font-bold tracking-tight">Cash on Delivery</p>
-                  <p className={`text-xs ${paymentMethod === 'cod' ? 'text-gray-400' : 'text-gray-500'}`}>Pay upon acquisition</p>
+                  <p className={`text-xs ${paymentMethod === 'cod' ? 'text-white/70' : 'text-gray-500'}`}>Pay upon acquisition</p>
                 </div>
               </label>
               
-              <label className={`flex items-center space-x-6 p-8 rounded-[2rem] border-2 cursor-pointer transition-all duration-500 ${paymentMethod === 'upi' ? 'border-premium-black bg-premium-black text-white' : 'border-premium-gray hover:border-gray-200'}`}>
+              <label className={`flex items-center space-x-6 p-8 rounded-[2rem] border-2 cursor-pointer transition-all duration-500 ${paymentMethod === 'upi' ? 'border-vibrant-pink bg-vibrant-pink text-white shadow-xl shadow-vibrant-pink/20' : 'border-premium-gray hover:border-gray-200'}`}>
                 <input type="radio" name="payment" className="hidden" checked={paymentMethod === 'upi'} onChange={() => setPaymentMethod('upi')} />
-                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'upi' ? 'border-premium-gold' : 'border-gray-300'}`}>
-                  {paymentMethod === 'upi' && <div className="w-3 h-3 bg-premium-gold rounded-full" />}
+                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${paymentMethod === 'upi' ? 'border-white' : 'border-gray-300'}`}>
+                  {paymentMethod === 'upi' && <div className="w-3 h-3 bg-white rounded-full" />}
                 </div>
                 <div>
                   <p className="font-bold tracking-tight">UPI Payment</p>
-                  <p className={`text-xs ${paymentMethod === 'upi' ? 'text-gray-400' : 'text-gray-500'}`}>Instant verification</p>
+                  <p className={`text-xs ${paymentMethod === 'upi' ? 'text-white/70' : 'text-gray-500'}`}>Instant verification</p>
                 </div>
               </label>
             </div>
@@ -465,14 +490,22 @@ export default function Checkout({ user }: { user: UserProfile }) {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Order Summary */}
-        <div className="lg:col-span-4">
-          <div className="bg-premium-black text-white p-10 rounded-[3rem] sticky top-32 space-y-10 shadow-2xl shadow-black/20">
-            <h2 className="text-2xl font-display font-black tracking-tight">Summary</h2>
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
+          className="lg:col-span-4"
+        >
+          <div className="bg-premium-black text-white p-10 rounded-[3rem] sticky top-32 space-y-10 shadow-2xl shadow-vibrant-purple/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-vibrant-pink/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-vibrant-blue/10 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl"></div>
             
-            <div className="space-y-6">
+            <h2 className="text-2xl font-display font-black tracking-tight relative z-10">Summary</h2>
+            
+            <div className="space-y-6 relative z-10">
               <div className="max-h-48 overflow-y-auto space-y-4 pr-2 no-scrollbar">
                 {cart.map(item => (
                   <div key={item.id} className="flex justify-between text-xs font-medium">
@@ -484,17 +517,17 @@ export default function Checkout({ user }: { user: UserProfile }) {
               
               <div className="pt-6 border-t border-white/10 flex justify-between items-center">
                 <span className="text-lg font-bold tracking-tight">Total</span>
-                <span className="text-4xl font-display font-black text-premium-gold">₹{total.toLocaleString('en-IN')}</span>
+                <span className="text-4xl font-display font-black vibrant-text-gradient">₹{total.toLocaleString('en-IN')}</span>
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting || (paymentMethod === 'upi' && (!isUpiVerified || !hasPaid))}
-              className="w-full bg-white text-premium-black py-5 rounded-full font-bold tracking-widest uppercase text-xs hover:bg-premium-gold hover:text-white transition-all duration-500 flex items-center justify-center space-x-4 group disabled:opacity-50"
+              className="w-full vibrant-gradient text-white py-5 rounded-full font-bold tracking-widest uppercase text-xs hover:scale-105 transition-all duration-500 flex items-center justify-center space-x-4 group disabled:opacity-50 shadow-xl shadow-vibrant-pink/20 relative z-10"
             >
               {isSubmitting ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-premium-black"></div>
+                <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
               ) : (
                 <>
                   <span>{paymentMethod === 'upi' ? 'Confirm Acquisition' : 'Complete Acquisition'}</span>
@@ -509,7 +542,7 @@ export default function Checkout({ user }: { user: UserProfile }) {
               <div className="w-8 h-8 bg-white/10 rounded-lg"></div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </form>
       {/* Large QR Modal */}
       <AnimatePresence>

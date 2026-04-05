@@ -122,25 +122,45 @@ async function startServer() {
     res.json(orders[index]);
   });
 
-  // Auth (Mock)
+  // Auth
+  app.post("/api/auth/register", async (req, res) => {
+    const { username, password, email, displayName } = req.body;
+    const users = await readData<any>(USERS_FILE);
+    
+    if (users.find(u => u.username === username)) {
+      return res.status(400).json({ message: "Username already exists" });
+    }
+
+    const newUser = {
+      uid: Date.now().toString(),
+      username,
+      password, // In a real app, hash this!
+      email,
+      displayName,
+      photoURL: `https://ui-avatars.com/api/?name=${displayName}`,
+      role: email === 'kalam172010@gmail.com' ? 'admin' : 'user',
+      createdAt: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    await writeData(USERS_FILE, users);
+    
+    // Don't send password back
+    const { password: _, ...userWithoutPassword } = newUser;
+    res.status(201).json(userWithoutPassword);
+  });
+
   app.post("/api/auth/login", async (req, res) => {
-    const { email, displayName, photoURL, uid } = req.body;
-    const users = await readData<UserProfile>(USERS_FILE);
-    let user = users.find(u => u.uid === uid);
+    const { username, password } = req.body;
+    const users = await readData<any>(USERS_FILE);
+    const user = users.find(u => u.username === username && u.password === password);
     
     if (!user) {
-      user = {
-        uid,
-        email,
-        displayName,
-        photoURL,
-        role: email === 'kalam172010@gmail.com' ? 'admin' : 'user',
-        createdAt: new Date().toISOString()
-      };
-      users.push(user);
-      await writeData(USERS_FILE, users);
+      return res.status(401).json({ message: "Invalid username or password" });
     }
-    res.json(user);
+
+    const { password: _, ...userWithoutPassword } = user;
+    res.json(userWithoutPassword);
   });
 
   // Settings

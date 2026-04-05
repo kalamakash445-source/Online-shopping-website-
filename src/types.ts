@@ -1,5 +1,6 @@
 export interface UserProfile {
   uid: string;
+  username: string;
   email: string;
   displayName: string;
   photoURL: string;
@@ -40,6 +41,7 @@ export interface Order {
     name: string;
     address: string;
     phone: string;
+    email?: string;
   };
   paymentMethod: 'cod' | 'online' | 'upi';
   upiId?: string;

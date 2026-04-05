@@ -4,12 +4,31 @@ const API_BASE = '/api';
 
 export const api = {
   // Auth
-  async login(userData: Partial<UserProfile>): Promise<UserProfile> {
+  async login(credentials: { username: string; password?: string }): Promise<UserProfile> {
     const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(credentials),
+    });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || 'Login failed');
+    }
+    const user = await res.json();
+    localStorage.setItem('bazaar_user', JSON.stringify(user));
+    return user;
+  },
+
+  async register(userData: { username: string; password?: string; email: string; displayName: string }): Promise<UserProfile> {
+    const res = await fetch(`${API_BASE}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
     });
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.message || 'Registration failed');
+    }
     const user = await res.json();
     localStorage.setItem('bazaar_user', JSON.stringify(user));
     return user;
